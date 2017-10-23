@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -43,9 +44,15 @@
     <Compile Include="AttributeProvider.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="AttributeTypeDescriptor.cs" />
+    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="IAttributes.cs" />
+    <Compile Include="IObjectValidations.cs" />
+    <Compile Include="IPropertyValidations.cs" />
+    <Compile Include="ObjectValidations.cs" />
     <Compile Include="ProjectionEqualityComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyValidations.cs" />
+    <Compile Include="ValidatableObjectAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
