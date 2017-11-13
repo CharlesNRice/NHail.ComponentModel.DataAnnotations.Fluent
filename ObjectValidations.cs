@@ -9,7 +9,7 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
 {
     public class ObjectValidations<TSource> : IObjectValidations<TSource>
     {
-        public ObjectValidations(IAttributes<TSource> provider)
+        public ObjectValidations(IAttributeConfiguration<TSource> provider)
         {
             if (provider == null)
             {
@@ -19,7 +19,8 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
             Provider = provider;
         }
 
-        public IObjectValidations<TSource> Add(Func<TSource, ValidationResult> validation)
+        public IObjectValidations<TSource> Add(Func<TSource, ValidationResult> validation,
+            Action<ValidationAttribute> setter = null)
         {
             if (validation == null)
             {
@@ -27,10 +28,11 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
             }
 
             Func<TSource, ValidationContext, ValidationResult> mapper = (source, context) => validation(source);
-            return Add(mapper);
+            return Add(mapper, setter);
         }
 
-        public IObjectValidations<TSource> Add(Func<TSource, ValidationContext, ValidationResult> validation)
+        public IObjectValidations<TSource> Add(Func<TSource, ValidationContext, ValidationResult> validation,
+            Action<ValidationAttribute> setter = null)
         {
             if (validation == null)
             {
@@ -38,30 +40,31 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
             }
 
             Func<object, ValidationContext, ValidationResult> mapper =
-                (obj, context) => validation((TSource)obj, context);
-            Provider.AddAttributes(new ValidatableObjectAttribute(mapper));
-            return this;
+                (obj, context) => validation((TSource) obj, context);
+            return Add(() => new ValidatableObjectAttribute(mapper), setter);
         }
 
-        public IObjectValidations<TSource> Add(Func<ValidationAttribute> factory)
+        public IObjectValidations<TSource> Add<TValidationAttribute>(Func<TValidationAttribute> factory,
+            Action<TValidationAttribute> setter = null)
+            where TValidationAttribute : ValidationAttribute
         {
             if (factory == null)
             {
                 throw new ArgumentNullException(nameof(factory));
             }
-            Provider.AddAttributes(factory());
+            var validation = factory();
+            setter?.Invoke(validation);
+            Provider.AddAttributes(validation);
             return this;
         }
 
-        public IObjectValidations<TSource> Add<TValidationAttribute>(Action<TValidationAttribute> setter = null) where TValidationAttribute : ValidationAttribute, new()
+        public IObjectValidations<TSource> Add<TValidationAttribute>(Action<TValidationAttribute> setter = null)
+            where TValidationAttribute : ValidationAttribute, new()
         {
-            var attribute = new TValidationAttribute();
-            setter?.Invoke(attribute);
-            Provider.AddAttributes(attribute);
-            return this;
+            return Add(() => new TValidationAttribute(), setter);
         }
 
-        public IAttributes<TSource> Provider { get; }
+        public IAttributeConfiguration<TSource> Provider { get; }
 
     }
 }

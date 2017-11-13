@@ -42,10 +42,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttributeProvider.cs" />
-    <Compile Include="Attributes.cs" />
+    <Compile Include="AttributeConfiguration.cs" />
     <Compile Include="AttributeTypeDescriptor.cs" />
     <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="IAttributes.cs" />
+    <Compile Include="IAttributeConfiguration.cs" />
     <Compile Include="IObjectValidations.cs" />
     <Compile Include="IPropertyValidations.cs" />
     <Compile Include="ObjectValidations.cs" />
@@ -53,6 +53,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyValidations.cs" />
     <Compile Include="ValidatableObjectAttribute.cs" />
+    <Compile Include="ValidateIfAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

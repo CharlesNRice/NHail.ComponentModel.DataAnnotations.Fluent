@@ -9,13 +9,27 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
 {
     public interface IPropertyValidations<TSource, out TProperty>
     {
-        IPropertyValidations<TSource, TProperty> Add<TValidationAttribute>(Action<TValidationAttribute> setter = null)
+        IPropertyValidations<TSource, TProperty> Add<TValidationAttribute>(
+            Func<TValidationAttribute, ValidationAttribute> setter = null)
             where TValidationAttribute : ValidationAttribute, new();
-        IPropertyValidations<TSource, TProperty> Add(Func<ValidationAttribute> factory);
-        IPropertyValidations<TSource, TProperty> Add(Func<TProperty, ValidationResult> validation);
-        IPropertyValidations<TSource, TProperty> Add(Func<TProperty, ValidationContext, ValidationResult> validation);
-        IPropertyValidations<TSource, TProperty> Add(Func<TProperty, TSource, ValidationResult> validation);
-        IPropertyValidations<TSource, TProperty> Add(Func<TProperty, TSource, ValidationContext, ValidationResult> validation);
-        IAttributes<TSource> Provider { get; }
+
+        IPropertyValidations<TSource, TProperty> Add<TValidationAttribute>(Func<TValidationAttribute> factory,
+            Func<TValidationAttribute, ValidationAttribute> setter = null)
+            where TValidationAttribute : ValidationAttribute;
+
+        IPropertyValidations<TSource, TProperty> Add(Func<TProperty, ValidationResult> validation,
+            Func<ValidationAttribute, ValidationAttribute> setter = null);
+
+        IPropertyValidations<TSource, TProperty> Add(Func<TProperty, ValidationContext, ValidationResult> validation,
+            Func<ValidationAttribute, ValidationAttribute> setter = null);
+
+        IPropertyValidations<TSource, TProperty> Add(Func<TProperty, TSource, ValidationResult> validation,
+            Func<ValidationAttribute, ValidationAttribute> setter = null);
+
+        IPropertyValidations<TSource, TProperty> Add(
+            Func<TProperty, TSource, ValidationContext, ValidationResult> validation,
+            Func<ValidationAttribute, ValidationAttribute> setter = null);
+
+        IAttributeConfiguration<TSource> Provider { get; }
     }
 }

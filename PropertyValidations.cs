@@ -12,36 +12,40 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
     {
         private readonly Expression<Func<TSource, TProperty>> _property;
 
-        public PropertyValidations(IAttributes<TSource> provider, Expression<Func<TSource, TProperty>> property)
+        public PropertyValidations(IAttributeConfiguration<TSource> provider,
+            Expression<Func<TSource, TProperty>> property)
         {
             Provider = provider;
             _property = property;
         }
 
         public IPropertyValidations<TSource, TProperty> Add<TValidationAttribute>(
-            Action<TValidationAttribute> setter = null)
+            Func<TValidationAttribute, ValidationAttribute> setter = null)
             where TValidationAttribute : ValidationAttribute, new()
         {
-            var attribute = new TValidationAttribute();
-            setter?.Invoke(attribute);
-            Provider.AddPropertyAttributes(_property, attribute);
-
-            return this;
+            return Add(() => new TValidationAttribute(), setter);
         }
 
-        public IPropertyValidations<TSource, TProperty> Add(Func<ValidationAttribute> factory)
+        public IPropertyValidations<TSource, TProperty> Add<TValidationAttribute>(Func<TValidationAttribute> factory,
+            Func<TValidationAttribute, ValidationAttribute> setter = null)
+            where TValidationAttribute : ValidationAttribute
         {
             if (factory == null)
             {
                 throw new ArgumentNullException(nameof(factory));
             }
 
-            Provider.AddPropertyAttributes(_property, factory());
+            if (setter == null)
+            {
+                setter = validationAttribute => validationAttribute;
+            }
+            Provider.AddPropertyAttributes(_property, setter(factory()));
 
             return this;
         }
 
-        public IPropertyValidations<TSource, TProperty> Add(Func<TProperty, ValidationResult> validation)
+        public IPropertyValidations<TSource, TProperty> Add(Func<TProperty, ValidationResult> validation,
+            Func<ValidationAttribute, ValidationAttribute> setter = null)
         {
             if (validation == null)
             {
@@ -49,11 +53,12 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
             }
             Func<TProperty, TSource, ValidationContext, ValidationResult> mapper =
                 (property, source, context) => validation(property);
-            return Add(mapper);
+            return Add(mapper, setter);
         }
 
         public IPropertyValidations<TSource, TProperty> Add(
-            Func<TProperty, ValidationContext, ValidationResult> validation)
+            Func<TProperty, ValidationContext, ValidationResult> validation,
+            Func<ValidationAttribute, ValidationAttribute> setter = null)
         {
             if (validation == null)
             {
@@ -62,10 +67,11 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
 
             Func<TProperty, TSource, ValidationContext, ValidationResult> mapper =
                 (property, source, context) => validation(property, context);
-            return Add(mapper);
+            return Add(mapper, setter);
         }
 
-        public IPropertyValidations<TSource, TProperty> Add(Func<TProperty, TSource, ValidationResult> validation)
+        public IPropertyValidations<TSource, TProperty> Add(Func<TProperty, TSource, ValidationResult> validation,
+            Func<ValidationAttribute, ValidationAttribute> setter = null)
         {
             if (validation == null)
             {
@@ -74,23 +80,29 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
 
             Func<TProperty, TSource, ValidationContext, ValidationResult> mapper =
                 (property, source, context) => validation(property, source);
-            return Add(mapper);
+            return Add(mapper, setter);
         }
 
         public IPropertyValidations<TSource, TProperty> Add(
-            Func<TProperty, TSource, ValidationContext, ValidationResult> validation)
+            Func<TProperty, TSource, ValidationContext, ValidationResult> validation,
+            Func<ValidationAttribute, ValidationAttribute> setter = null)
         {
             if (validation == null)
             {
                 throw new ArgumentNullException(nameof(validation));
             }
 
+            if (setter == null)
+            {
+                setter = validationAttribute => validationAttribute;
+            }
+
             Func<object, ValidationContext, ValidationResult> mapper =
-                (value, context) => validation((TProperty)value, (TSource)context.ObjectInstance, context);
-            Provider.AddPropertyAttributes(_property, new ValidatableObjectAttribute(mapper));
-            return this;
+                (value, context) => validation((TProperty) value, (TSource) context.ObjectInstance, context);
+
+            return Add(() => new ValidatableObjectAttribute(mapper), setter);
         }
 
-        public IAttributes<TSource> Provider { get; }
+        public IAttributeConfiguration<TSource> Provider { get; }
     }
 }

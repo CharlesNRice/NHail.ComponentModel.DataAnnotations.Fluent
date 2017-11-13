@@ -11,9 +11,17 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
     {
         IObjectValidations<TSource> Add<TValidationAttribute>(Action<TValidationAttribute> setter = null)
             where TValidationAttribute : ValidationAttribute, new();
-        IObjectValidations<TSource> Add(Func<ValidationAttribute> factory);
-        IObjectValidations<TSource> Add(Func<TSource, ValidationResult> validation);
-        IObjectValidations<TSource> Add(Func<TSource, ValidationContext, ValidationResult> validation);
-        IAttributes<TSource> Provider { get; }
+
+        IObjectValidations<TSource> Add<TValidationAttribute>(Func<TValidationAttribute> factory,
+            Action<TValidationAttribute> setter = null)
+            where TValidationAttribute : ValidationAttribute;
+
+        IObjectValidations<TSource> Add(Func<TSource, ValidationResult> validation,
+            Action<ValidationAttribute> setter = null);
+
+        IObjectValidations<TSource> Add(Func<TSource, ValidationContext, ValidationResult> validation,
+            Action<ValidationAttribute> setter = null);
+
+        IAttributeConfiguration<TSource> Provider { get; }
     }
 }
