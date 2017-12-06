@@ -20,7 +20,6 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
         }
     }
 
-
     public class ProjectionEqualityComparer<TSource, TResult> : IEqualityComparer<TSource>
     {
         private readonly Func<TSource, TResult> _projection;

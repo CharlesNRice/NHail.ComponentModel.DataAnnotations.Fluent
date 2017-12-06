@@ -9,6 +9,8 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
 {
     public class ObjectValidations<TSource> : IObjectValidations<TSource>
     {
+        private readonly IAttributeConfiguration<TSource> _provider;
+
         public ObjectValidations(IAttributeConfiguration<TSource> provider)
         {
             if (provider == null)
@@ -16,7 +18,7 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
                 throw new ArgumentNullException(nameof(provider));
             }
 
-            Provider = provider;
+            _provider = provider;
         }
 
         public IObjectValidations<TSource> Add(Func<TSource, ValidationResult> validation,
@@ -54,7 +56,7 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
             }
             var validation = factory();
             setter?.Invoke(validation);
-            Provider.AddAttributes(validation);
+            _provider.AddAttributes(validation);
             return this;
         }
 
@@ -63,8 +65,5 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
         {
             return Add(() => new TValidationAttribute(), setter);
         }
-
-        public IAttributeConfiguration<TSource> Provider { get; }
-
     }
 }
