@@ -20,98 +20,73 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
             _property = property;
         }
 
+        /// <summary>
+        /// Adds the validation attribute to the property
+        /// </summary>
+        /// <typeparam name="TValidationAttribute"></typeparam>
+        /// <param name="validationAttribute"></param>
+        /// <returns></returns>
         public IPropertyValidations<TSource, TProperty> Add<TValidationAttribute>(
-            Func<TValidationAttribute, Attribute> setter = null)
-            where TValidationAttribute : ValidationAttribute, new()
-        {
-            return Add(() => new TValidationAttribute(), setter);
-        }
-
-        public IPropertyValidations<TSource, TProperty> Add<TValidationAttribute>(Func<TValidationAttribute> factory,
-            Func<TValidationAttribute, Attribute> setter = null)
+            TValidationAttribute validationAttribute)
             where TValidationAttribute : ValidationAttribute
         {
-            if (factory == null)
-            {
-                throw new ArgumentNullException(nameof(factory));
-            }
-
-            if (setter == null)
-            {
-                setter = validAttribute => validAttribute;
-            }
-
-            // If factory returns null or setter returns null then don't add attribute
-            var validationAttribute = factory();
-            if (validationAttribute != null)
-            {
-                var attribute = setter(validationAttribute);
-                if (attribute != null)
-                {
-                    _provider.AddPropertyAttributes(_property, attribute);
-                }
-            }
-
+            _provider.AddPropertyAttributes(_property, validationAttribute);
             return this;
         }
 
-        public IPropertyValidations<TSource, TProperty> Add(Func<TProperty, ValidationResult> validation,
-            Func<ValidationAttribute, Attribute> setter = null)
+        /// <summary>
+        /// Helper method to chain into Add(TValidationAttribute validationAttribute) but don't need to create attribute
+        /// </summary>
+        /// <typeparam name="TValidationAttribute"></typeparam>
+        /// <param name="setter"></param>
+        /// <returns></returns>
+        public IPropertyValidations<TSource, TProperty> Add<TValidationAttribute>(
+            Action<TValidationAttribute> setter = null)
+            where TValidationAttribute : ValidationAttribute, new()
         {
-            if (validation == null)
-            {
-                throw new ArgumentNullException(nameof(validation));
-            }
-            Func<TProperty, TSource, ValidationContext, ValidationResult> mapper =
-                (property, source, context) => validation(property);
-            return Add(mapper, setter);
+            var attribute = new TValidationAttribute();
+            setter?.Invoke(attribute);
+            return Add(attribute);
         }
 
-        public IPropertyValidations<TSource, TProperty> Add(
-            Func<TProperty, ValidationContext, ValidationResult> validation,
-            Func<ValidationAttribute, Attribute> setter = null)
+        /// <summary>
+        /// Helper method to chain into Add(TValidationAttribute validationAttribute) but don't need to create attribute
+        /// </summary>
+        /// <typeparam name="TValidationAttribute"></typeparam>
+        /// <param name="properties"></param>
+        /// <returns></returns>
+        public IPropertyValidations<TSource, TProperty> AddIfValid<TValidationAttribute>(
+            params Expression<Func<TSource, object>>[] properties)
+            where TValidationAttribute : ValidationAttribute, new()
         {
-            if (validation == null)
-            {
-                throw new ArgumentNullException(nameof(validation));
-            }
-
-            Func<TProperty, TSource, ValidationContext, ValidationResult> mapper =
-                (property, source, context) => validation(property, context);
-            return Add(mapper, setter);
+            return AddIfValid<TValidationAttribute>(null, properties);
         }
 
-        public IPropertyValidations<TSource, TProperty> Add(Func<TProperty, TSource, ValidationResult> validation,
-            Func<ValidationAttribute, Attribute> setter = null)
+        /// <summary>
+        /// Helper method to chain into Add(TValidationAttribute validationAttribute) but don't need to create attribute
+        /// </summary>
+        /// <typeparam name="TValidationAttribute"></typeparam>
+        /// <param name="setter"></param>
+        /// <param name="properties"></param>
+        /// <returns></returns>
+        public IPropertyValidations<TSource, TProperty> AddIfValid<TValidationAttribute>(
+            Action<TValidationAttribute> setter,
+            params Expression<Func<TSource, object>>[] properties)
+            where TValidationAttribute : ValidationAttribute, new()
         {
-            if (validation == null)
+            var attribute = new TValidationAttribute();
+            setter?.Invoke(attribute);
+
+            var propsToValidate = properties.ToDictionary(p => p.NameOf(), p =>
             {
-                throw new ArgumentNullException(nameof(validation));
-            }
+                var func = p.Compile();
+                Func<object, object> convert = o => func((TSource) o);
+                return convert;
+            });
 
-            Func<TProperty, TSource, ValidationContext, ValidationResult> mapper =
-                (property, source, context) => validation(property, source);
-            return Add(mapper, setter);
-        }
+            var validationAttribute = new ValidateIfAttribute(propsToValidate, attribute);
 
-        public IPropertyValidations<TSource, TProperty> Add(
-            Func<TProperty, TSource, ValidationContext, ValidationResult> validation,
-            Func<ValidationAttribute, Attribute> setter = null)
-        {
-            if (validation == null)
-            {
-                throw new ArgumentNullException(nameof(validation));
-            }
-
-            if (setter == null)
-            {
-                setter = validationAttribute => validationAttribute;
-            }
-
-            Func<object, ValidationContext, ValidationResult> mapper =
-                (value, context) => validation((TProperty) value, (TSource) context.ObjectInstance, context);
-
-            return Add(() => new ValidatableObjectAttribute(mapper), setter);
+            return Add(validationAttribute);
         }
     }
 }

@@ -13,6 +13,7 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
 {
     public static class ExtensionMethods
     {
+
         public static IPropertyValidations<TSource, TProperty> ValidationsFor<TSource, TProperty>(
             this IAttributeConfiguration<TSource> provider, Expression<Func<TSource, TProperty>> property)
         {
@@ -24,36 +25,6 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
         {
             return new ObjectValidations<TSource>(provider);
         }
-
-        public static Func<ValidationAttribute, ValidationAttribute> WhenValid<TSource, TProperty>(
-            this IPropertyValidations<TSource, TProperty> propertyValidations,
-            params Expression<Func<TSource, object>>[] properties)
-        {
-
-            var propsToValidate = properties.ToDictionary(p => p.NameOf(), p =>
-            {
-                var func = p.Compile();
-                Func<object, object> mapper = o => func((TSource) o);
-                return mapper;
-            });
-
-            return validationAttribute => new ValidateIfAttribute(propsToValidate, validationAttribute);
-        }
-
-        public static Func<ValidationAttribute, ValidationAttribute> WhenValid<TSource>(
-            this IAttributeConfiguration<TSource> provider, params Expression<Func<TSource, object>>[] properties)
-        {
-
-            var propsToValidate = properties.ToDictionary(p => p.NameOf(), p =>
-            {
-                var func = p.Compile();
-                Func<object, object> mapper = o => func((TSource) o);
-                return mapper;
-            });
-
-            return validationAttribute => new ValidateIfAttribute(propsToValidate, validationAttribute);
-        }
-
 
         public static string NameOf<TSource, TProperty>(this Expression<Func<TSource, TProperty>> property)
         {

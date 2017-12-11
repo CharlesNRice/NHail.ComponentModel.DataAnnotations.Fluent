@@ -49,9 +49,11 @@
     <Compile Include="IObjectValidations.cs" />
     <Compile Include="IPropertyValidations.cs" />
     <Compile Include="ObjectValidations.cs" />
+    <Compile Include="ObjectValidationsExtensions.cs" />
     <Compile Include="ProjectionEqualityComparer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyValidations.cs" />
+    <Compile Include="PropertyValidationsExtensions.cs" />
     <Compile Include="ValidatableObjectAttribute.cs" />
     <Compile Include="ValidateIfAttribute.cs" />
   </ItemGroup>

@@ -19,32 +19,14 @@ namespace NHail.ComponentModel.DataAnnotations.Fluent
             where TValidationAttribute : ValidationAttribute, new();
 
         /// <summary>
-        /// Adds a validation attribute to the class using a factory to create the validation attribute
+        /// Adds the attribute to the class 
         /// </summary>
         /// <typeparam name="TValidationAttribute"></typeparam>
-        /// <param name="factory"></param>
+        /// <param name="validationAttribute"></param>
         /// <param name="setter"></param>
         /// <returns></returns>
-        IObjectValidations<TSource> Add<TValidationAttribute>(Func<TValidationAttribute> factory,
+        IObjectValidations<TSource> Add<TValidationAttribute>(TValidationAttribute validationAttribute,
             Action<TValidationAttribute> setter = null)
             where TValidationAttribute : ValidationAttribute;
-
-        /// <summary>
-        /// Wraps a Func or Method into a validation attributes and adds to the class
-        /// </summary>
-        /// <param name="validation"></param>
-        /// <param name="setter"></param>
-        /// <returns></returns>
-        IObjectValidations<TSource> Add(Func<TSource, ValidationResult> validation,
-            Action<ValidationAttribute> setter = null);
-
-        /// <summary>
-        /// Wraps a Func or Method into a validation attributes and adds to the class
-        /// </summary>
-        /// <param name="validation"></param>
-        /// <param name="setter"></param>
-        /// <returns></returns>
-        IObjectValidations<TSource> Add(Func<TSource, ValidationContext, ValidationResult> validation,
-            Action<ValidationAttribute> setter = null);
     }
 }
